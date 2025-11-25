@@ -226,3 +226,18 @@ venv/
 *.tmp
 *.swp
 
+# Don't upload Docker volumes data
+
+wazuh_data/
+
+indexer_data/
+
+# Don't upload logs
+
+*.log
+
+# Don't upload sensitive configs (optional)
+
+# config/*.key
+
+# config/*.pem

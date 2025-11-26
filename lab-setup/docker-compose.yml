@@ -27,11 +27,11 @@ services:
     hostname: wazuh-dashboard
     ports:
       - "5601:5601"
+    volumes:
+      - ./config/opensearch_dashboards.yml:/usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
     depends_on:
       - wazuh-manager
       - wazuh-indexer
-
 volumes:
   wazuh_data:
   indexer_data:
-

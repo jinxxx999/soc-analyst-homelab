@@ -1,4 +1,3 @@
- HEAD
 # Splunk Installation Guide (Home Lab)
 
 ## Overview
@@ -21,7 +20,7 @@ Link: https://www.splunk.com/en_us/download/splunk-enterprise.html
 ### Update system
 ```bash
 sudo apt update && sudo apt upgrade -y
-
+```
 ## Splunk Installation and Setup (macOS)
 
 1. **Download Splunk**  

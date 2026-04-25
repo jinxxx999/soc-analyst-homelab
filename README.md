@@ -1,65 +1,51 @@
-# SOC Analyst Home Lab
-
+# 🛡️ SOC Analyst Home Lab: Detection & Analysis
 ## Overview
-This project is a personal **SOC Analyst home lab** designed to simulate real-world security operations.  
-It demonstrates hands-on skills in **SIEM deployment, attack simulation, log analysis, and incident reporting**, making it ideal for a resume or portfolio.
+This project demonstrates a fully functional Security Operations Center (SOC) environment built within a virtualized infrastructure. The goal was to simulate real-world cyber attacks and practice monitoring, detecting, and analyzing security events using industry-standard tools.
 
----
+## 🏗️ Architecture & Tools
+SIEM/Log Management: Splunk / Elastic Stack (ELK)
 
-## Tech Stack
-- **SIEM Tools:** Splunk, Wazuh, Elastic Stack  
-- **Attack Tools / Techniques:** Hydra, Nmap, SQL Injection, Brute-force, BadUSB simulation  
-- **Scripting & Analysis:** Python, Bash  
-- **Environment:** Local lab using virtual machines or Docker
+Endpoint Detection & Response (EDR): Wazuh
 
----
+Virtualization: Docker / VMware / VirtualBox
 
-## Lab Setup
-1. **Install and configure SIEM tools**  
-   - [Splunk setup instructions](lab-setup/install_splunk.md)  
-   - [Wazuh setup instructions](lab-setup/install_wazuh.md)  
-   - [Elastic Stack setup instructions](lab-setup/install_elastic.md)
+Traffic Analysis: Wireshark
 
-2. **Verify connectivity and log ingestion**  
-   Ensure logs from simulated attacks are being received by each SIEM tool.
+OS: Ubuntu (Server), Kali Linux (Attacker), Windows (Victim)
 
----
+## 🛠️ Lab Setup
+The environment was deployed using Docker Compose for rapid scaling and management.
 
-## Attack Simulations
-The following attack simulations were performed:
+Endpoint Monitoring: Configured Wazuh agents on Windows/Linux endpoints to collect syslogs and monitor file integrity.
 
-| Attack Type       | Tool/Script              | Notes |
-|------------------|-------------------------|-------|
-| Brute Force       | `attacks/brute_force.py` | Successful login attempts logged |
-| Hydra Password Attack | Hydra                 | Example SSH brute-force |
-| SQL Injection     | `attacks/sql_injection_test.md` | Detected in Wazuh/Elastic logs |
-| Network Scanning  | Nmap                    | Logs captured in Splunk |
-| BadUSB Simulation | Manual/Script           | Simulated in isolated VM |
+Centralized Logging: Integrated Wazuh with Splunk/Elastic for advanced data visualization and long-term retention.
 
----
+Network Security: Setup pfSense/Snort (если использовала) to capture and inspect network traffic.
 
-## Detection Rules & Dashboards
-- **Splunk:** Custom alerts and dashboards in `dashboards/splunk_dashboard.json`  
-- **Wazuh:** Rule configurations in `detections/wazuh_rules.md`  
-- **Elastic Stack:** Queries and visualizations for attack detection  
+📂 Detailed setup instructions can be found in the lab-setup/ directory.
 
-Screenshots or exported dashboards can be found in the `dashboards/screenshots/` folder.
+## 🎯 Security Scenarios & Investigations
+In this lab, I conducted several attack simulations to test detection capabilities:
 
----
+1. Brute Force Attack Detection
 
-## Logs & Analysis
-Sample logs collected during attacks are stored in `logs/sample_logs.log`.  
-Analysis includes identifying suspicious activity, correlating events, and generating alerts.
+Attack: Performed an SSH brute force using Hydra from a Kali Linux machine.
 
----
+Detection: Wazuh triggered a Level 10 alert for "Multiple failed SSH logins."
 
-## Final Report
-A comprehensive report of the lab, including methodology, attack results, and detection findings, is available in `reports/SOC_lab_report.md`.
+Analysis: Investigated the logs in Splunk to identify the source IP and the targeted user account.
 
----
+Outcome: Created a custom rule to block the attacker's IP after 5 failed attempts.
 
-## How to Use
-1. Clone the repo:  
-   ```bash
-   git clone https://github.com/your-username/soc-analyst-homelab.git
-   cd soc-analyst-homelab
+2. Malware Analysis (Example)
+
+Investigation: Analyzed a suspicious .ppt file (Oski Stealer) to identify C2 communication and persistence mechanisms.
+
+Tools Used: VirusTotal, Any.run, Wireshark.
+
+## 📈 Key Achievements
+Successfully integrated multiple security tools into a unified monitoring dashboard.
+
+Improved incident response time by creating custom alerting rules.
+
+Gained hands-on experience with log parsing and query languages (SPL/KQL).

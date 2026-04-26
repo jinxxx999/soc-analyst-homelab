@@ -1,54 +1,63 @@
 # Splunk Installation Guide (Home Lab)
 
 ## Overview
-This guide explains how to install Splunk Enterprise on a local machine or virtual machine for the SOC Analyst Home Lab.
+Standalone Splunk Enterprise deployment for log aggregation and security analysis comparison.
+## Components
+Splunk Enterprise (Latest): All-in-one indexer, search head, and forwarder management (Free 60-day license)
+## Prerequisites
+Docker & Docker Compose installed
+
+4GB+ RAM (Splunk is memory-hungry)
+
+Ports: 8000 (Web UI), 8089 (Management), 9997 (Indexing)
 
 ---
 
-## 1. Download Splunk Enterprise
-Go to the Splunk website and download the free trial:
+## Installation Steps
+### Project Directory
 
-- Splunk Enterprise (Free 60-day license)
-- Linux, macOS, or Windows version depending on your OS
-
-Link: https://www.splunk.com/en_us/download/splunk-enterprise.html
-
----
-
-## 2. Install Splunk (Linux Example)
-
-### Update system
-```bash
-sudo apt update && sudo apt upgrade -y
+``` Bash 
+mkdir -p splunk-lab
+cd splunk-lab
 ```
-## Splunk Installation and Setup (macOS)
+### Deployment Command
 
-1. **Download Splunk**  
-   - Go to https://www.splunk.com/en_us/download/splunk-enterprise.html  
-   - Choose macOS `.dmg` version
+Run the container with accepted license and admin password:
 
-2. **Install Splunk**  
-   - Open the `.dmg` file and drag Splunk to `/Applications`  
-   - Open Terminal and run:
-     ```bash
-     cd /Applications/Splunk/bin
-     ./splunk start --accept-license
-     ```
-   - Create admin username and password
+```Bash
+docker-compose up -d splunk
+```
+### Verify Container Status
 
-3. **Add Data Input**  
-   - Go to Splunk Web: http://localhost:8000 → Login  
-   - Settings → Add Data → Monitor → Files & Directories  
-   - Source: `/var/log/system.log`  
-   - Sourcetype: `mac_system_log`  
-   - Host: `MacBook-Air-Yelizaveta.local`  
-   - Index: `main`  
-   - Submit → Splunk now indexes your macOS system logs
+```Bash
+docker ps | grep splunk
+```
+### Access Web Interface
 
-4. **Verify Logs**  
-   - Search:
-     ```spl
-     index=main sourcetype="mac_system_log" | head 20
-     ```
-   - Logs should appear, confirming Splunk is running successfully
- a4c614a6aa2b72f3a8cf7b65293bea62a5f66a60
+URL: http://localhost:8000
+
+Username: admin
+
+Password: [YourSecretPassword]
+## Troubleshooting
+High CPU/RAM usage
+
+Splunk can be slow on startup. Give it 3-5 minutes to initialize the web interface.
+
+Data not appearing
+
+Ensure the HEC (HTTP Event Collector) or Receiver (Port 9997) is manually enabled in the Settings > Data Inputs menu.
+
+## What I Learned
+Splunk licensing and basic setup
+
+Difference between Splunk and OpenSearch-based Indexers
+
+Managing heavy containers in Docker
+
+## Next Steps
+[ ] Install Splunk Universal Forwarder on a test machine
+
+[ ] Create a basic dashboard for failed login attempts
+
+[ ] Integrate Wazuh alerts via API/Syslog

@@ -1,31 +1,32 @@
 # Wazuh SIEM Lab Installation Guide
 
 ## Overview
-Docker-based Wazuh SIEM environment for threat detection and security monitoring practice.
+This repository contains the deployment configuration for the Wazuh Manager, the central brain of the SOC laboratory. It orchestrates security monitoring, log analysis, and vulnerability detection across the infrastructure.
 
-## Components
+## Architecture
 - **Wazuh Manager** (v4.14.1): Security management and log analysis
 - **Wazuh Indexer** (v4.14.1): Data storage and search (OpenSearch-based)
 - **Wazuh Dashboard** (v4.14.1): Web interface for visualization
 
 ## Prerequisites
-- Docker installed
-- Docker Compose installed
-- 4GB+ RAM available
-- Ports 1514, 1515, 5601, 9200, 55000 available
+- Docker & Docker Compose
+- System Memory: 6GB+ RAM (total for the full stack)
+- Ports 1514 (Agent logs), 1515 (Registration), 55000 (API)
+
+---
 
 ## Installation Steps
 
-### 1. Clone or create project structure
+###  Clone or create project structure
 ```bash
 mkdir -p wazuh-lab/config
 cd wazuh-lab
 ```
 
-### 2. Create docker-compose.yml
+###  Create docker-compose.yml
 [Content of your docker-compose.yml]
 
-### 3. Create dashboard configuration
+###  Create dashboard configuration
 Create `config/opensearch_dashboards.yml`:
 ```yaml
 server.host: "0.0.0.0"
@@ -39,17 +40,17 @@ opensearch_security.multitenancy.enabled: false
 uiSettings.overrides.defaultRoute: /app/wazuh
 ```
 
-### 4. Start services
+###  Start services
 ```bash
 docker-compose up -d
 ```
 
-### 5. Verify all containers are running
+### Verify all containers are running
 ```bash
 docker ps
 ```
 
-### 6. Access Dashboard
+### Access Dashboard
 - URL: http://localhost:5601
 - Username: `admin`
 - Password: `SecretPassword`

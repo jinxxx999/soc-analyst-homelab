@@ -27,6 +27,10 @@ services:
     hostname: wazuh-dashboard
     ports:
       - "5601:5601"
+    depends_on:
+      - wazuh-manager
+      - wazuh-indexer
+      
   splunk:
     image: splunk/splunk:latest
     platform: linux/amd64
@@ -36,11 +40,7 @@ services:
       - SPLUNK_PASSWORD=YourStrongPassword123
     ports:
       - "8000:8000"
-    volumes:
-      - ./config/opensearch_dashboards.yml:/usr/share/wazuh-dashboard/config/opensearch_dashboards.yml
-    depends_on:
-      - wazuh-manager
-      - wazuh-indexer
+  
 volumes:
   wazuh_data:
   indexer_data:

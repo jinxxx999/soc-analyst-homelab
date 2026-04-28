@@ -1,0 +1,22 @@
+# Security: Never push certificates or private keys
+**/certs/*
+*.pem
+*.key
+*.csr
+
+# Database and Persistence: Ignore local data volumes
+data/
+ossec_data/
+
+# Passwords and Environment: Ignore files containing secrets
+*.env
+config/wazuh_indexer/wazuh-passwords.txt
+
+# MacOS specific: Ignore system junk and installer files
+.DS_Store
+*.pkg
+/tmp/wazuh_envs
+
+# Logs and temporary files
+*.log
+*.tmp

@@ -1,53 +1,54 @@
-Troubleshooting: Wazuh Dashboard Connection & Auth Failures
-This document outlines the debugging process for a critical connectivity issue encountered during a Wazuh deployment in a Docker environment.
+# Troubleshooting Guide: Wazuh Connection & Auth Failures
 
-1. The Issue: "Application Not Found"
-When accessing the Wazuh Dashboard via browser, the interface returned an "Application Not Found" error or failed to connect to the Wazuh Manager, despite all containers showing a status of Up.
+This document details the debugging process for critical connectivity and synchronization issues encountered during the SOC Home Lab deployment.
 
-2. Root Cause Analysis
-The investigation revealed a synchronization failure between the Wazuh Dashboard, Wazuh Manager, and Wazuh Indexer.
+## 1. The "Application Not Found" & Connectivity Issue
+**Issue:** The Wazuh Dashboard returned "Application Not Found" or connection timeouts, even though Docker containers were reported as `Up`.
 
-Authentication Method: Modern Wazuh (v4.3+) uses RBAC (Role-Based Access Control) integrated with OpenSearch (Indexer).
+**Root Cause:** Synchronization failure between the Dashboard, Manager and Indexer caused by mismatched API credentials and resource constraints.
 
-Credential Mismatch: The default admin:admin credentials were deprecated. While a custom SecretPassword was identified in the opensearch_dashboards.yml configuration, the Wazuh Manager API was not updated to recognize this password, resulting in 401 Unauthorized errors.
+**Diagnostic Steps:**
+* **Direct API Validation:** I bypassed the UI to test the Manager API directly from within the container:
+  ```bash
+  docker exec -it wazuh-manager curl -u admin:YourPassword -k -X GET "https://localhost:55000/manager/info?pretty=true"
 
-3. Debugging Steps Taken
-Step 1: Direct API Validation
+* **Log Inspection:** Identified 401 Unauthorized errors, confirming the issue was authentication-based, not network-based.
 
-To bypass the Dashboard UI and test the Manager directly, I executed a curl command from within the manager container:
+* **Credential Discovery:** Used `grep -r "password" .`to locate mismatched strings across the configuration files.
+  
+## 2. Authentication & Password Mismatches
+**Issue:** Standard credentials (`admin:admin`) failed, and custom passwords defined in configuration files were not being accepted.
 
-Bash
-docker exec -it wazuh-manager curl -u admin:SecretPassword -k -X GET "https://localhost:55000/manager/info?pretty=true"
-Result: {"title": "Unauthorized", "detail": "No authorization token provided"}. This confirmed the issue was strictly related to API authentication, not network routing.
+**Resolution:**
 
-Step 2: Configuration Inspection
+* **Security Admin Script**: Manually forced the Indexer to apply security configurations to the cluster:
+```bash
+bash /usr/share/wazuh-indexer/plugins/opensearch-security/tools/securityadmin.sh -cd /usr/share/wazuh-indexer/plugins/opensearch-security/securityconfig/ -icl -nhnv -cacert /usr/share/wazuh-indexer/config/certs/root-ca.pem -cert /usr/share/wazuh-indexer/config/certs/admin.pem -key /usr/share/wazuh-indexer/config/certs/admin-key.pem -h localhost
+```
+* **Unified Identity:** Implemented a single source of truth for passwords to ensure all components share a consistent security manifest.
 
-I performed a recursive search to locate where the deployment script stored sensitive strings:
 
-Bash
-grep -r "password" .
-This revealed that while the Indexer was configured with a custom password, the Manager environment variables in the docker-compose.yml were missing or mismatched.
+## 3. Resource & Environment Fixes
+**Issue:** Containers crashing or hanging during the initialization sequence.
 
-Step 3: Manual Auth Override Attempt
+**Resolution:**
+* **Memory Limits:** Increased Docker RAM allocation to **6GB** to support the resource-heavy Indexer and Dashboard stack.
+* **Kernel Parameters:** Adjusted the host machine's memory map limits to prevent Elasticsearch crashes:
+  ```bash
+  sysctl -w vm.max_map_count=262144
+  ```
+* **Total Cleanup:** When configuration "Frankensteining" occurred, I used `docker-compose down -v` to wipe corrupted volumes and ensure a clean state for re-deployment.
+  
+### Lessons Learned
+**Trust but Verify:** Always test backend APIs via `curl` before troubleshooting the frontend UI.
 
-Attempted to force a password update using the Wazuh internal identity binary:
+**Infrastructure as Code:** Maintaining a clean `docker-compose.yml` and unified `.env` variables is more efficient than fixing a running stack.
 
-Bash
-docker exec -it wazuh-manager /var/ossec/bin/wazuh-authd -P [PRIVATE_PASSWORD]
-4. Key Lessons & Final Resolution
-The "Frankenstein" nature of the docker-compose file (mixing different configuration sources) led to a broken chain of trust between services.
+**Documentation is Key:** Keeping track of manual overrides (like securityadmin.sh) is essential for long-term lab stability.
 
-Final Fix Strategy:
+### Technical Stack Used
+**Orchestration:** Docker / Docker-compose
 
-Total Cleanup: Perform a docker-compose down -v to wipe corrupted volumes and old credential caches.
+**Security:** RBAC, OpenSearch Security Plugin
 
-Official Baseline: Re-deploy using the official wazuh-docker repository.
-
-Unified Identity: Utilize the generate-certs.yml tool to ensure all components share a consistent security manifest and a single source of truth for passwords (wazuh-passwords.txt).
-
-Technical Stack Used
-Orchestration: Docker / Docker-compose
-
-Security: RBAC, OpenSearch Security Plugin
-
-Diagnostics: Bash, cURL, Linux Filesystem Inspection (grep/find)
+**Diagnostics:** Bash, cURL, Linux Filesystem Inspection (grep/find)
